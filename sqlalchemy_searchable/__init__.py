@@ -7,6 +7,9 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import DDL, DDLElement
 from sqlalchemy.sql.expression import Executable
 from sqlalchemy_utils import TSVectorType
+from sqlalchemy.dialects.postgresql import REGCONFIG
+from sqlalchemy import cast, literal
+
 
 from .vectorizers import Vectorizer
 
@@ -65,7 +68,7 @@ def search(query, search_query, vector=None, regconfig=None, sort=False):
         regconfig = search_manager.options["regconfig"]
 
     query = query.filter(
-        vector.op("@@")(sa.func.parse_websearch(regconfig, search_query))
+        vector.op("@@")(sa.func.parse_websearch(cast(literal(regconfig), type_=REGCONFIG), search_query))
     )
     if sort:
         query = query.order_by(
